@@ -1,0 +1,9 @@
+/SampleMicroLive/.vs/SampleMicroLive/
+*.suo
+*.user
+_ReSharper.*
+bin
+obj
+packages
+/SampleMicroLive/SampleMicroLive/AppPackages/*
+.vs

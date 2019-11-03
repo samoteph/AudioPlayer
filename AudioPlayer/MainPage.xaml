@@ -1,0 +1,27 @@
+﻿<Page
+    x:Class="AudioPlayer.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:AudioPlayer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+
+        <Grid.Resources>
+            <Style TargetType="Button">
+                <Setter Property="Margin" Value="10"></Setter>
+            </Style>
+        </Grid.Resources>
+        
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Play Loop" Click="ButtonPlayLoop_Click"></Button>
+            <Button Content="Stop Loop" Click="ButtonStopLoop_Click"></Button>
+            <Button Content="Play Async" Click="ButtonPlayAsync_Click"></Button>
+            <Button Content="Play Fire &amp; Forget" Click="ButtonPlayFireAndForget_Click"></Button>
+            <CheckBox Content="Mute" Click="CheckBoxMute_Click"/>
+        </StackPanel>
+    </Grid>
+</Page>
