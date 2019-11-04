@@ -36,7 +36,40 @@ namespace SamuelBlanchard.Audio
         
         private AudioDeviceOutputNode _outputNode;
 
-        private Dictionary<TKey, AudioFileInputNode> soundLibrary = new Dictionary<TKey, AudioFileInputNode>();
+        private Dictionary<TKey, AudioFileInputSource> soundLibrary = new Dictionary<TKey, AudioFileInputSource>();
+
+        private class AudioFileInputSource
+        {
+            public int Index
+            {
+                get
+                {
+                    return _index;
+                }
+            }
+
+            private int _index;
+
+            public List<AudioFileInputNode> InputNodes
+            {
+                get;
+                private set;
+            } = new List<AudioFileInputNode>();
+
+            public AudioFileInputNode GetInputNode()
+            {
+                int index = _index;
+                var nodes = this.InputNodes;
+
+                index = _index % nodes.Count;
+
+                var result = nodes[index];
+
+                _index++;
+
+                return result;
+            }
+        }
 
         public bool IsMute
         {
@@ -139,14 +172,14 @@ namespace SamuelBlanchard.Audio
                 return false;
             }
 
-            var inputNode = this.GetSound(keySource);
+            var inputSource = this.GetSound(keySource);
 
-            var file = inputNode.SourceFile;
+            var file = inputSource.GetInputNode().SourceFile;
 
             return await this.AddSound(keyDestination, file);
         }
 
-        public async Task<bool> AddSound(TKey key, StorageFile soundFile)
+        public async Task<bool> AddSound(TKey key, StorageFile soundFile, int inputCount = 1)
         {
             if(this.IsInitialized == false)
             {
@@ -155,20 +188,27 @@ namespace SamuelBlanchard.Audio
 
             if(soundLibrary.ContainsKey(key) == false)
             {
-                var fileInputNodeResult = await _audioGraph.CreateFileInputNodeAsync(soundFile);
+                var source = new AudioFileInputSource();
 
-                if (fileInputNodeResult.Status != AudioFileNodeCreationStatus.Success)
+                for (int x = 0; x < inputCount; x++)
                 {
-                    return false;
+                    var fileInputNodeResult = await _audioGraph.CreateFileInputNodeAsync(soundFile);
+
+                    if (fileInputNodeResult.Status != AudioFileNodeCreationStatus.Success)
+                    {
+                        return false;
+                    }
+
+                    var fileInputNode = fileInputNodeResult.FileInputNode;
+
+                    fileInputNode.Stop();
+
+                    fileInputNode.AddOutgoingConnection(_outputNode);
+
+                    source.InputNodes.Add(fileInputNode);
                 }
 
-                var fileInputNode = fileInputNodeResult.FileInputNode;
-
-                fileInputNode.Stop();
-
-                fileInputNode.AddOutgoingConnection(_outputNode);
-
-                this.soundLibrary.Add(key, fileInputNodeResult.FileInputNode);
+                this.soundLibrary.Add(key, source);
             }
             else
             {
@@ -179,10 +219,10 @@ namespace SamuelBlanchard.Audio
         }
 
 
-        public async Task<bool> AddSoundFromApplication(TKey key, string uriFile)
+        public async Task<bool> AddSoundFromApplication(TKey key, string uriFile, int inputCount = 1)
         {
             var soundFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(uriFile));
-            await AddSound(key, soundFile);
+            await AddSound(key, soundFile, inputCount);
 
             return true;
         }
@@ -194,8 +234,12 @@ namespace SamuelBlanchard.Audio
                 return;
             }
 
-            var fileInputNode = GetSound(key);
-            fileInputNode.Stop();
+            var fileInputSource = GetSound(key);
+
+            foreach (var node in fileInputSource.InputNodes)
+            {
+                node.Stop();
+            }
         }
 
         /// <summary>
@@ -209,11 +253,16 @@ namespace SamuelBlanchard.Audio
                 return;
             }
 
-            var fileInputNode = GetSound(key);
+            var fileInputSource = GetSound(key);
 
-            fileInputNode.Stop();
-            fileInputNode.RemoveOutgoingConnection(_outputNode);
-            fileInputNode.Dispose();               
+            foreach (var node in fileInputSource.InputNodes)
+            {
+                node.Stop();
+                node.RemoveOutgoingConnection(_outputNode);
+                node.Dispose();
+            }
+
+            this.soundLibrary.Remove(key);
         }
 
         /// <summary>
@@ -229,7 +278,9 @@ namespace SamuelBlanchard.Audio
                 return false;
             }
             
-            var fileInputNode = GetSound(key);
+            var fileInputSource = GetSound(key);
+
+            var fileInputNode = fileInputSource.GetInputNode();
 
             TypedEventHandler<AudioFileInputNode, object> completed = null;
 
@@ -256,8 +307,12 @@ namespace SamuelBlanchard.Audio
 
         public void SetVolume(TKey key, double volume)
         {
-            var fileInputNode = GetSound(key);
-            SetVolume(fileInputNode, volume);
+            var fileInputSource = GetSound(key);
+
+            foreach (var node in fileInputSource.InputNodes)
+            {
+                SetVolume(node, volume);
+            }
         }
 
         private void SetVolume(AudioFileInputNode fileInputNode, double volume)
@@ -265,14 +320,26 @@ namespace SamuelBlanchard.Audio
             fileInputNode.OutgoingGain = volume;
         }
 
-        public bool PlaySound(TKey key, double volume = 1, bool isLoop = false)
+        public bool PlayLoop(TKey key, double volume = 1)
+        {
+            return this.PlaySound(key, volume, true);
+        }
+
+        public bool PlaySound(TKey key, double volume = 1)
+        {
+            return this.PlaySound(key, volume, false);
+        }
+
+        private bool PlaySound(TKey key, double volume = 1, bool isLoop = false)
         {
             if (this.IsInitialized == false)
             {
                 return false;
             }
 
-            var fileInputNode = GetSound(key);
+            var fileInputSource = GetSound(key);
+
+            var fileInputNode = fileInputSource.GetInputNode();
 
             fileInputNode.Stop();
 
@@ -294,7 +361,7 @@ namespace SamuelBlanchard.Audio
             return true;
         }
 
-        private AudioFileInputNode GetSound(TKey key)
+        private AudioFileInputSource GetSound(TKey key)
         {
             if (soundLibrary.ContainsKey(key))
             {

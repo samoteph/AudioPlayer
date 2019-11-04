@@ -31,25 +31,34 @@ namespace AudioPlayer
             this.Loaded += MainPage_Loaded;
         }
 
+        // key for the sound dictionnary of the AudioPlayer
         enum AudioKeys
         {
             Loop,
-            Switch
+            Connected,
+            Connected10Channels
         }
 
         Sound.AudioPlayer<AudioKeys> audioPlayer = new Sound.AudioPlayer<AudioKeys>();
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            // initialize the audioPlayer
             await audioPlayer.InitializeAsync();
 
+            // Add some sounds
+
+            // Add 1 inputNode for sound loop
             await audioPlayer.AddSoundFromApplication(AudioKeys.Loop, "ms-appx:///Assets/Sounds/Loop.wav");
-            await audioPlayer.AddSoundFromApplication(AudioKeys.Switch, "ms-appx:///Assets/Sounds/Switch.wav");
+            // Add 1 inputNode
+            await audioPlayer.AddSoundFromApplication(AudioKeys.Connected, "ms-appx:///Assets/Sounds/Connected.wav");
+            // Add 10 inputNodes
+            await audioPlayer.AddSoundFromApplication(AudioKeys.Connected10Channels, "ms-appx:///Assets/Sounds/Connected.wav", 10);
         }
 
         private void ButtonPlayLoop_Click(object sender, RoutedEventArgs e)
         {
-            audioPlayer.PlaySound(AudioKeys.Loop, 1, true);    
+            audioPlayer.PlayLoop(AudioKeys.Loop);    
         }
 
         private void ButtonStopLoop_Click(object sender, RoutedEventArgs e)
@@ -64,12 +73,22 @@ namespace AudioPlayer
 
         private async void ButtonPlayAsync_Click(object sender, RoutedEventArgs e)
         {
-            await audioPlayer.PlaySoundAsync(AudioKeys.Switch);
+            await audioPlayer.PlaySoundAsync(AudioKeys.Connected);
         }
 
         private void ButtonPlayFireAndForget_Click(object sender, RoutedEventArgs e)
         {
-            audioPlayer.PlaySound(AudioKeys.Switch);
+            audioPlayer.PlaySound(AudioKeys.Connected);
+        }
+
+        private void ButtonPlayMultiChannels_Click(object sender, RoutedEventArgs e)
+        {
+            audioPlayer.PlaySound(AudioKeys.Connected10Channels);
+        }
+
+        private void ButtonStopMultiChannels_Click(object sender, RoutedEventArgs e)
+        {
+            audioPlayer.Stop(AudioKeys.Connected10Channels);
         }
     }
 }
