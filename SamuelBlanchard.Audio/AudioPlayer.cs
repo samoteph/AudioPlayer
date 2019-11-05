@@ -176,10 +176,10 @@ namespace SamuelBlanchard.Audio
 
             var file = inputSource.GetInputNode().SourceFile;
 
-            return await this.AddSound(keyDestination, file);
+            return await this.AddSoundAsync(keyDestination, file);
         }
 
-        public async Task<bool> AddSound(TKey key, StorageFile soundFile, int inputCount = 1)
+        public async Task<bool> AddSoundAsync(TKey key, StorageFile soundFile, int inputCount = 1)
         {
             if(this.IsInitialized == false)
             {
@@ -219,10 +219,10 @@ namespace SamuelBlanchard.Audio
         }
 
 
-        public async Task<bool> AddSoundFromApplication(TKey key, string uriFile, int inputCount = 1)
+        public async Task<bool> AddSoundFromApplicationAsync(TKey key, string uriFile, int inputCount = 1)
         {
             var soundFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(uriFile));
-            await AddSound(key, soundFile, inputCount);
+            await AddSoundAsync(key, soundFile, inputCount);
 
             return true;
         }
@@ -240,6 +240,50 @@ namespace SamuelBlanchard.Audio
             {
                 node.Stop();
             }
+        }
+
+        public bool IsStopping
+        {
+            get;
+            private set;
+        }
+
+        public void Stop()
+        {
+            if (this.IsInitialized == false)
+            {
+                return;
+            }
+
+            this.IsStopping = true;
+
+            foreach(var audioKey in this.soundLibrary.Keys)
+            {
+                Stop(audioKey);
+            }
+
+            this.IsStopping = false;
+        }
+
+        /// <summary>
+        /// Si l'on retire tous les sons on arrête de les jouer
+        /// </summary>
+
+        public void RemoveSound()
+        {
+            if (this.IsInitialized == false)
+            {
+                return;
+            }
+
+            this.IsStopping = true;
+
+            foreach (var audioKey in this.soundLibrary.Keys)
+            {
+                RemoveSound(audioKey);
+            }
+
+            this.IsStopping = false;
         }
 
         /// <summary>
@@ -337,6 +381,11 @@ namespace SamuelBlanchard.Audio
                 return false;
             }
 
+            if(this.IsStopping == true)
+            {
+                return false;
+            }
+
             var fileInputSource = GetSound(key);
 
             var fileInputNode = fileInputSource.GetInputNode();
@@ -355,8 +404,11 @@ namespace SamuelBlanchard.Audio
             fileInputNode.Seek(TimeSpan.Zero);
 
             this.SetVolume(fileInputNode, volume);
-            
-            fileInputNode.Start();
+
+            if (this.IsStopping == false)
+            {
+                fileInputNode.Start();
+            }
 
             return true;
         }

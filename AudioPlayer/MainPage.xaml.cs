@@ -13,11 +13,11 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-using Sound = SamuelBlanchard.Audio;
+using SamuelBlanchard.Audio;
 
 // Pour plus d'informations sur le modèle d'élément Page vierge, consultez la page https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace AudioPlayer
+namespace AudioPlayerSample
 {
     /// <summary>
     /// Une page vide peut être utilisée seule ou constituer une page de destination au sein d'un frame.
@@ -39,7 +39,7 @@ namespace AudioPlayer
             Connected10Channels
         }
 
-        Sound.AudioPlayer<AudioKeys> audioPlayer = new Sound.AudioPlayer<AudioKeys>();
+        AudioPlayer<AudioKeys> audioPlayer = new AudioPlayer<AudioKeys>();
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
@@ -49,11 +49,11 @@ namespace AudioPlayer
             // Add some sounds
 
             // Add 1 inputNode for sound loop
-            await audioPlayer.AddSoundFromApplication(AudioKeys.Loop, "ms-appx:///Assets/Sounds/Loop.wav");
+            await audioPlayer.AddSoundFromApplicationAsync(AudioKeys.Loop, "ms-appx:///Assets/Sounds/Loop.wav");
             // Add 1 inputNode
-            await audioPlayer.AddSoundFromApplication(AudioKeys.Connected, "ms-appx:///Assets/Sounds/Connected.wav");
+            await audioPlayer.AddSoundFromApplicationAsync(AudioKeys.Connected, "ms-appx:///Assets/Sounds/Connected.wav");
             // Add 10 inputNodes
-            await audioPlayer.AddSoundFromApplication(AudioKeys.Connected10Channels, "ms-appx:///Assets/Sounds/Connected.wav", 10);
+            await audioPlayer.AddSoundFromApplicationAsync(AudioKeys.Connected10Channels, "ms-appx:///Assets/Sounds/Connected.wav", 10);
         }
 
         private void ButtonPlayLoop_Click(object sender, RoutedEventArgs e)
@@ -86,9 +86,9 @@ namespace AudioPlayer
             audioPlayer.PlaySound(AudioKeys.Connected10Channels);
         }
 
-        private void ButtonStopMultiChannels_Click(object sender, RoutedEventArgs e)
+        private void ButtonStop_Click(object sender, RoutedEventArgs e)
         {
-            audioPlayer.Stop(AudioKeys.Connected10Channels);
+            audioPlayer.Stop();
         }
     }
 }

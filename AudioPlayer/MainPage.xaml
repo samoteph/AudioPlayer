@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="AudioPlayer.MainPage"
+    x:Class="AudioPlayerSample.MainPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:AudioPlayer"
@@ -22,7 +22,7 @@
             <Button Content="Play Async" Click="ButtonPlayAsync_Click"></Button>
             <Button Content="Play Fire &amp; Forget" Click="ButtonPlayFireAndForget_Click"></Button>
             <Button Content="Play Multi channels" Click="ButtonPlayMultiChannels_Click"></Button>
-            <Button Content="Stop Multi channels" Click="ButtonStopMultiChannels_Click"></Button>
+            <Button Content="Stop All" Click="ButtonStop_Click"></Button>
             <CheckBox Content="Mute" Click="CheckBoxMute_Click"/>
         </StackPanel>
     </Grid>

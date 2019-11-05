@@ -7,8 +7,8 @@
     <ProjectGuid>{5C5AC31E-5536-4674-8754-FCC70BF88CC8}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AudioPlayer</RootNamespace>
-    <AssemblyName>AudioPlayer</AssemblyName>
+    <RootNamespace>AudioPlayerSample</RootNamespace>
+    <AssemblyName>AudioPlayerSample</AssemblyName>
     <DefaultLanguage>fr-FR</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.18362.0</TargetPlatformVersion>
